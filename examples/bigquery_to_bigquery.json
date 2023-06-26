@@ -1,0 +1,25 @@
+{
+  "name": "bigquery-to-bigquery-example",
+  "description": "Sample data load from BigQuery to BigQuery.",
+  "sources": [
+    {
+      "name": "bigqueryInput",
+      "module": "bigquery",
+      "parameters": {
+        "query": "SELECT * FROM `bigquery-public-data.samples.shakespeare` LIMIT 100;",
+        "project": "py-dataflow"
+      }
+    }
+  ],
+  "sinks": [
+    {
+      "name": "bigqueryOutput",
+      "module": "bigquery",
+      "input": "bigqueryInput",
+      "parameters": {
+        "table": "py-dataflow:test.bigquery_to_bigquery_sample_output",
+        "create_disposition": "CREATE_IF_NEEDED"
+      }
+    }
+  ]
+}

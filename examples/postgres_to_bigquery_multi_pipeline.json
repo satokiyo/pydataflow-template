@@ -1,0 +1,34 @@
+{
+  "name": "postgres-to-bigquery-multi-pipeline",
+  "description": "Sample data load from PostgreSQL to BigQuery multi pipeline.",
+  "sources": [
+    {
+      "name": "postgresInput",
+      "module": "postgres",
+      "parameters": {
+        "query": "select * from test;",
+        "profile": "test_postgres"
+      }
+    }
+  ],
+  "sinks": [
+    {
+      "name": "bigqueryOutput1",
+      "module": "bigquery",
+      "input": "postgresInput",
+      "parameters": {
+        "table": "py-dataflow:test.postgres_to_bigquery_sample_output-1",
+        "create_disposition": "CREATE_IF_NEEDED"
+      }
+    },
+    {
+      "name": "bigqueryOutput2",
+      "module": "bigquery",
+      "input": "postgresInput",
+      "parameters": {
+        "table": "py-dataflow:test.postgres_to_bigquery_sample_output_2",
+        "create_disposition": "CREATE_IF_NEEDED"
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+FROM gcr.io/dataflow-templates-base/python39-template-launcher-base
+
+ARG WORKDIR=/dataflow/template
+ARG BEAM_VERSION=2.48.0
+RUN mkdir -p ${WORKDIR}
+WORKDIR ${WORKDIR}
+
+COPY src/pydataflow_template/ ${WORKDIR}/pydataflow_template/
+COPY spec/python_command_spec.json ${WORKDIR}/spec/python_command_spec.json
+COPY ./pyproject.toml ./poetry.lock ${WORKDIR}/
+
+
+#RUN apt update && apt install -y git
+RUN apt update && apt -y install openjdk-11-jdk
+RUN pip install --no-cache-dir apache-beam[gcp]==${BEAM_VERSION}
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+RUN pip install --no-cache-dir poetry
+RUN poetry export --only main --without-hashes --format=requirements.txt > requirements.txt \
+    && pip install --no-cache-dir -r requirements.txt
+RUN python -c "import compileall; \
+    compileall.compile_path(maxlevels=10)"
+RUN python -m compileall src/pydataflow_template/
+
+ENV DATAFLOW_PYTHON_COMMAND_SPEC="${WORKDIR}/spec/python_command_spec.json"
+ENV PIP_NO_DEPS=True
+ENV PYTHONFAULTHANDLER=1

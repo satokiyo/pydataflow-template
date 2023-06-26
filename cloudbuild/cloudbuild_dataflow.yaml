@@ -1,0 +1,42 @@
+steps:
+  # build dataflow worker image
+  - id: build_and_push_image_worker
+    name: "gcr.io/cloud-builders/docker"
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        docker build -t ${_WORKER_IMAGE} -f Dockerfile.worker \
+        --build-arg BEAM_VERSION=${_BEAM_VERSION} \
+        --cache-from ${_WORKER_IMAGE}:latest \
+        .
+
+  # build dataflow flextemplate image
+  - id: build_and_push_image_flextemplate
+    name: "gcr.io/cloud-builders/docker"
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        docker build -t ${_FLEXTEMPLATE_IMAGE} -f Dockerfile.flextemplate \
+        --build-arg BEAM_VERSION=${_BEAM_VERSION} \
+        --cache-from ${_FLEXTEMPLATE_IMAGE}:latest \
+        .
+
+  # Create Dataflow template spec file
+  - id: create_template_spec
+    name: gcr.io/cloud-builders/gcloud
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        gcloud dataflow flex-template build ${_TEMPLATE_PATH} \
+        --project ${_PROJECT_ID} \
+        --image ${_FLEXTEMPLATE_IMAGE} \
+        --metadata-file ${_METADATA_FILE} \
+        --sdk-language "PYTHON"
+
+# Push the container image to Container Registry
+images:
+  - "${_FLEXTEMPLATE_IMAGE}"
+  - "${_WORKER_IMAGE}"

@@ -1,0 +1,31 @@
+FROM python:3.9-slim
+
+ARG WORKDIR=/dataflow/template
+ARG BEAM_VERSION=2.48.0
+RUN mkdir -p ${WORKDIR}
+WORKDIR ${WORKDIR}
+
+COPY src/pydataflow_template/ ${WORKDIR}/pydataflow_template/
+COPY ./pyproject.toml ./poetry.lock ${WORKDIR}/
+
+# install
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+RUN pip install --no-cache-dir poetry
+RUN poetry export --only main --without-hashes --format=requirements.txt > requirements.txt \
+    && pip install --no-cache-dir -r requirements.txt
+
+# Install Beam SDK
+RUN pip install --no-cache-dir apache-beam[gcp]==${BEAM_VERSION}
+
+RUN python -c "import compileall; \
+    compileall.compile_path(maxlevels=10)"
+RUN python -m compileall src/main/
+
+# Copy files from official SDK image, including script/dependencies
+COPY --from=apache/beam_python3.9_sdk:2.48.0 /opt/apache/beam /opt/apache/beam
+
+ENV PYTHONFAULTHANDLER=1
+ENV PYTHONPATH $PYTHONPATH:${WORKDIR}/pydataflow_template/
+
+# Set the entrypoint to Apache Beam SDK launcher.
+ENTRYPOINT ["/opt/apache/beam/boot"]

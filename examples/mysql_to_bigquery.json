@@ -1,0 +1,25 @@
+{
+  "name": "mysql-to-bigquery",
+  "description": "Sample data load from MySQL to BigQuery.",
+  "sources": [
+    {
+      "name": "mysqlInput",
+      "module": "mysql",
+      "parameters": {
+        "query": "select * from test_db.test;",
+        "profile": "test_mysql"
+      }
+    }
+  ],
+  "sinks": [
+    {
+      "name": "bigqueryOutput",
+      "module": "bigquery",
+      "input": "mysqlInput",
+      "parameters": {
+        "table": "py-dataflow:test.mysql_to_bigquery_sample_output",
+        "create_disposition": "CREATE_IF_NEEDED"
+      }
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+/venv/
+/test/
+/**pycache**/
+docs/
+cloudbuild/
+Makefile
+.\*
+_.md
+_.bk
+_.out
+_.log
+
+# upload
+
+!Dockerfile\*
+!src/main/
+!src/connector/
+!src/requirements/
+!spec/
+!workflow/
+!configs/
+!examples/

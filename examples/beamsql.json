@@ -1,0 +1,36 @@
+{
+  "name": "postgres-to-bigquery-beamsql-transform",
+  "description": "Sample data load from PostgreSQL to BigQuery with BeamSQL Transform. Currently, there are limitations on the datatypes supported, and the Java Runtime must be installed.",
+  "sources": [
+    {
+      "name": "postgresInput",
+      "module": "postgres",
+      "parameters": {
+        "query": "select id, name from test;",
+        "profile": "test_postgres"
+      }
+    }
+  ],
+  "transforms": [
+    {
+      "name": "BeamsqlTransform",
+      "module": "beamsql",
+      "inputs": ["postgresInput", "postgresInput"],
+      "parameters": {
+        "sql": "SELECT id, name, count(*) AS `count` FROM a GROUP BY id, name UNION ALL SELECT id, name, count(*) AS `count` FROM b GROUP BY id, name",
+        "inputs_alias": ["a", "b"]
+      }
+    }
+  ],
+  "sinks": [
+    {
+      "name": "bigqueryOutput",
+      "module": "bigquery",
+      "input": "BeamsqlTransform",
+      "parameters": {
+        "table": "py-dataflow:test.beamsql_sample_output",
+        "create_disposition": "CREATE_IF_NEEDED"
+      }
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+main:
+  params: [args]
+  steps:
+    - init:
+        assign:
+          #- project_number: $${sys.get_env("GOOGLE_CLOUD_PROJECT_NUMBER")}
+          #- now: ${time.format(sys.now(), "Asia/Tokyo")}
+          - projectId: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
+          - region: ${args.region}
+          - dataflowApi: "dataflow.googleapis.com/v1b3"
+          - baseurl: ${"https://" + dataflowApi + "/projects/" + projectId + "/locations/" + region} # (dataflow rest api)[https://cloud.google.com/dataflow/docs/reference/rest]
+          - splitPathList: ${text.split(text.split(args.config, ".")[0], "/")}
+          - fileName: ${text.replace_all(text.to_lower(splitPathList[len(splitPathList) - 1]), "_", "-")}
+          - jobName: ${"job-" + fileName}
+          - config: ${args.config}
+          - profile: ${args.profile}
+          - gcs_temp_folder: ${args.gcs_temp_folder}
+          - containerSpecGcsPath: ${args.containerSpecGcsPath}
+          #- vpc_network: ${args.vpc_network}
+          - subnetwork: ${args.subnetwork}
+          - workerContainerImage: ${args.workerContainerImage}
+          - pollingSeconds: ${args.pollingSeconds}
+
+    - createDataflowJob:
+        call: http.post # (flextemplates.launch)[https://cloud.google.com/dataflow/docs/reference/rest/v1b3/projects.locations.flexTemplates/launch]
+        args:
+          url: ${baseurl + "/flexTemplates:launch"}
+          body:
+            launchParameter: # https://cloud.google.com/workflows/docs/reference/googleapis/dataflow/v1b3/Overview#launchflextemplaterequest
+              jobName: ${jobName}
+              containerSpecGcsPath: ${containerSpecGcsPath}
+              parameters:
+                config: ${config}
+                profile: ${profile}
+                gcs_temp_folder: ${gcs_temp_folder}
+              environment: # https://cloud.google.com/workflows/docs/reference/googleapis/dataflow/v1b3/Overview#flextemplateruntimeenvironment
+                #network: ${vpc_network}
+                subnetwork: ${subnetwork}
+                #additionalExperiments:
+                #  - use_network_tags_for_flex_templates=
+                #  - use_network_tags=
+                sdkContainerImage: ${workerContainerImage}
+                ipConfiguration: WORKER_IP_PRIVATE
+                #workerRegion: ${region}
+                stagingLocation: ${gcs_temp_folder}
+                tempLocation: ${gcs_temp_folder}
+          auth:
+            type: OAuth2
+            scope: https://www.googleapis.com/auth/cloud-platform
+        result: launchResponse
+
+    - assignLunchResponse:
+        assign:
+          - jobId: ${launchResponse.body.job.id}
+          - jobName: ${launchResponse.body.job.name}
+
+    - logLaunchJob:
+        call: sys.log
+        args:
+          data: ${"Launched job. job_id:" + jobId + " job_name:" + jobName + " link:" + "https://console.cloud.google.com/dataflow/jobs/" + region + "/" + jobId}
+
+    - getJob:
+        call: http.get
+        args:
+          url: ${baseurl + "/jobs/" + jobId}
+          auth:
+            type: OAuth2
+        result: getJobResult
+
+    - checkJob:
+        switch:
+          - condition: ${getJobResult.body.currentState == "JOB_STATE_DONE" OR
+              getJobResult.body.currentState == "JOB_STATE_CANCELLED" OR
+              getJobResult.body.currentState == "JOB_STATE_UPDATED" OR
+              getJobResult.body.currentState == "JOB_STATE_DRAINED"}
+            next: returnResult
+          - condition: ${getJobResult.body.currentState == "JOB_STATE_FAILED"}
+            next: failExecution
+        next: sleep
+
+    - sleep:
+        call: sys.sleep
+        args:
+          seconds: ${pollingSeconds}
+        next: getJob
+
+    - returnResult:
+        return:
+          message: "finished"
+          job_id: ${jobId}
+          job_name: ${jobName}
+
+    - failExecution:
+        raise:
+          message: "failed."
+          job_id: ${jobId}
+          job_name: ${jobName}

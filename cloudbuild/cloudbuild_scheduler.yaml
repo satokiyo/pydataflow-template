@@ -1,0 +1,36 @@
+steps:
+  # create or update cloud scheduler trigger.
+  - id: create scheduler
+    name: gcr.io/cloud-builders/gcloud
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        if [ ${_ALREADY_EXISTS} -gt 0 ]; \
+        then \
+          echo scheduler job is already exists!! update.; \
+          gcloud scheduler jobs update http ${SCHEDULER_NAME} \
+            --schedule="${_CRON_EXP}" \
+            --uri="https://workflowexecutions.googleapis.com/v1/projects/${PROJECT_ID}/locations/${_LOCATION}/workflows/${_WORKFLOW_NAME}/executions" \
+            --message-body="{ \
+              \"argument\": ${_ARGUMENT}, \
+              \"callLogLevel\": \"CALL_LOG_LEVEL_UNSPECIFIED\" \
+            }" \
+            --time-zone="Asia/Tokyo" \
+            --location=${_LOCATION} \
+            --oauth-service-account-email=${_WORKFLOW_SERVICE_ACCOUNT} \
+            ; \
+        else \
+          echo scheduler job is not exists yet!! create.; \
+          gcloud scheduler jobs update http ${SCHEDULER_NAME} \
+            --schedule="${_CRON_EXP}" \
+            --uri="https://workflowexecutions.googleapis.com/v1/projects/${PROJECT_ID}/locations/${_LOCATION}/workflows/${_WORKFLOW_NAME}/executions" \
+            --message-body="{ \
+              \"argument\": ${_ARGUMENT}, \
+              \"callLogLevel\": \"CALL_LOG_LEVEL_UNSPECIFIED\" \
+            }" \
+            --time-zone="Asia/Tokyo" \
+            --location=${_LOCATION} \
+            --oauth-service-account-email=${_WORKFLOW_SERVICE_ACCOUNT} \
+            ; \
+        fi

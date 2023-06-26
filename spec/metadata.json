@@ -1,0 +1,21 @@
+{
+  "name": "PyDataflow Template",
+  "description": "PyDataflow Template for batch pipeline",
+  "parameters": [
+    {
+      "name": "config",
+      "label": "config",
+      "helpText": "help text"
+    },
+    {
+      "name": "profile",
+      "label": "profile",
+      "helpText": "help text"
+    },
+    {
+      "name": "gcs_temp_folder",
+      "label": "gcs_temp_folder",
+      "helpText": "help text"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "name": "postgres-to-bigquery-incremental-merge",
+  "description": "Sample data load from PostgreSQL to BigQuery with incremental append. The destination table must be pre-created with the same schema.",
+  "sources": [
+    {
+      "name": "postgresInput",
+      "module": "postgres",
+      "incremental": true,
+      "parameters": {
+        "query": "select * from test;",
+        "profile": "test_postgres",
+        "incremental_column": "date",
+        "incremental_interval_from": "120day",
+        "destination_sink_name": "bigqueryOutput"
+      }
+    }
+  ],
+  "sinks": [
+    {
+      "name": "bigqueryOutput",
+      "module": "bigquery",
+      "input": "postgresInput",
+      "mode": "merge",
+      "parameters": {
+        "merge_keys": ["id", "name"],
+        "table": "py-dataflow:test.postgres_to_bigquery_incremental_merge_sample_output",
+        "create_disposition": "CREATE_NEVER",
+        "partitioning": "DAY",
+        "partitioning_field": "date"
+      }
+    }
+  ]
+}

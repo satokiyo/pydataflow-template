@@ -1,0 +1,16 @@
+steps:
+  # sync configs/ examples/ with storage
+  - id: "sync-config-files-to-storage"
+    name: gcr.io/cloud-builders/gcloud
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        gsutil -m -h "Cache-Contral:no-store" rsync \
+          -j json -c -r -d \
+          configs \
+          gs://${_BUCKET_NAME}/configs/ \
+        && gsutil -m -h "Cache-Contral:no-store" rsync \
+          -j json -c -r -d \
+          examples \
+          gs://${_BUCKET_NAME}/examples/

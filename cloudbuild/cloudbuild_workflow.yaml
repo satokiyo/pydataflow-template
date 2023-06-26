@@ -1,0 +1,12 @@
+steps:
+  # Deploy the workflow
+  - id: "deploy-workflow"
+    name: "gcr.io/cloud-builders/gcloud"
+    entrypoint: "bash"
+    args:
+      - -c
+      - |
+        gcloud workflows deploy ${_WORKFLOW_NAME} \
+        --source=${_WORKFLOW_CONFIG_YAML} \
+        --service-account=${_WORKFLOW_SERVICE_ACCOUNT} \
+        --location ${_LOCATION}

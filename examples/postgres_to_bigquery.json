@@ -1,0 +1,25 @@
+{
+  "name": "postgres-to-bigquery",
+  "description": "Sample data load from PostgreSQL to BigQuery.",
+  "sources": [
+    {
+      "name": "postgresInput",
+      "module": "postgres",
+      "parameters": {
+        "query": "select * from test;",
+        "profile": "test_postgres"
+      }
+    }
+  ],
+  "sinks": [
+    {
+      "name": "bigqueryOutput",
+      "module": "bigquery",
+      "input": "postgresInput",
+      "parameters": {
+        "table": "py-dataflow:test.postgres_to_bigquery_sample_output",
+        "create_disposition": "CREATE_IF_NEEDED"
+      }
+    }
+  ]
+}

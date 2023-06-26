@@ -1,0 +1,30 @@
+version: "3"
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: passw0rd
+      POSTGRES_DB: test_db
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    volumes:
+      - ./db_scripts/postgres:/docker-entrypoint-initdb.d
+    ports:
+      - 5432:5432
+    user: root
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: test_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: passw0rd
+    volumes:
+      - ./db_scripts/mysql:/docker-entrypoint-initdb.d
+    ports:
+      - 3306:3306
+    user: root

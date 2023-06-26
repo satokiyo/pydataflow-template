@@ -1,0 +1,21 @@
+# ignore
+/venv/
+/test/
+/__pycache__/
+docs/
+cloudbuild/
+configs/
+examples/
+Makefile
+.*
+*.json
+*.md
+*.bk
+*.out
+*.log
+
+# upload
+!src/main/
+!src/connector/
+!src/requirements/
+!spec/
