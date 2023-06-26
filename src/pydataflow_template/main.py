@@ -240,9 +240,6 @@ if __name__ == "__main__":
 
     beam_args.append("--experiments=use_runner_v2")
     beam_args.append("--sdk_location=container")
-    beam_args.append(
-        "--sdk_container_image=asia-northeast2-docker.pkg.dev/py-dataflow/pydataflow-repo/pydataflow-worker:latest"
-    )
 
     main(
         pipeline_config_file_path=args.config,
