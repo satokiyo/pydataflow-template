@@ -16,3 +16,7 @@ The following parameters can be used to configure the BigQuery source module:
 | destination_search_range  | Optional                                 | String | Optional parameter used when the `incremental` parameter in the source module is set to `true` and `incremental_interval_from` is set to `max_value_in_destination`. Limits the range of the `max(incremental_column)` value from the previous sink table to reduce the scan size. Specify the range in the format `-X[unit]` (X is an integer, and unit can be `min`, `hour`, or `day`). Example: -15min, -1hour, etc.                          |
 
 Please note that the `incremental` parameter mentioned above refers to a common parameter in the source module configuration.
+
+## Example config files
+
+- [bigquery_to_bigquery](../../../../examples/bigquery_to_bigquery.json)

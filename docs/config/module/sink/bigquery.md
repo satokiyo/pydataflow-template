@@ -19,3 +19,10 @@ The following parameters can be used to configure the BigQuery sink module:
 Note: For timestamp types, the timezone information is treated as absent.
 
 [2] The `partitioning` and `clustering` options can only be used if the destination table is a partitioned table or does not exist. It is not possible to convert an existing non-partitioned table to a partitioned table. [Reference: Google Issue Tracker](https://issuetracker.google.com/issues/113304131)
+
+## Example config files
+
+- [postgres_to_bigquery](../../../../examples/postgres_to_bigquery.json)
+- [postgres_to_bigquery_incremental_append](../../../../examples/postgres_to_bigquery_incremental_append.json)
+- [postgres_to_bigquery_incremental_merge](../../../../examples/postgres_to_bigquery_incremental_merge.json)
+- [postgres_to_bigquery_multi_pipeline](../../../../examples/postgres_to_bigquery_multi_pipeline.json)

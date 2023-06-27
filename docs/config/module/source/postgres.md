@@ -64,3 +64,8 @@ WHERE created_at >= '2023-01-01';
 ```
 
 Please make sure to replace the example values with the actual connection details for your PostgreSQL database.
+
+## Example config files
+
+- [postgres_to_bigquery](../../../../examples/postgres_to_bigquery.json)
+- [postgres_to_bigquery_incremental_merge](../../../../examples/postgres_to_bigquery_incremental_merge.json)

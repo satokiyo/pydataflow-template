@@ -17,3 +17,10 @@ Sink module to write the input data to a specified BigQuery table.
 ※ タイムスタンプ型の場合、タイムゾーン情報は無いものとして扱う
 
 [2] 既存の非パーティション分割テーブルをパーティション分割テーブルへ変更することはできないため、これらのオプションは宛先テーブルがパーティション分割テーブル or 存在しない場合にのみ使用する。https://issuetracker.google.com/issues/113304131
+
+## 構成例
+
+- [postgres_to_bigquery](../../../../examples/postgres_to_bigquery.json)
+- [postgres_to_bigquery_incremental_append](../../../../examples/postgres_to_bigquery_incremental_append.json)
+- [postgres_to_bigquery_incremental_merge](../../../../examples/postgres_to_bigquery_incremental_merge.json)
+- [postgres_to_bigquery_multi_pipeline](../../../../examples/postgres_to_bigquery_multi_pipeline.json)

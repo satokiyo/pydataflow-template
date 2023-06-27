@@ -33,3 +33,7 @@ Source Module for loading data by specifying a query from MySQL.
   }
 }
 ```
+
+## 構成例
+
+- [mysql_to_bigquery](../../../../examples/mysql_to_bigquery.json)

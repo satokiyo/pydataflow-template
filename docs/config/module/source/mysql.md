@@ -41,3 +41,7 @@ The connection profiles JSON file mentioned in [1] should be specified as a JSON
 You can either refer to these profiles by specifying the profile key or
 
 directly configure the connection attributes in the module configuration.
+
+## Example config files
+
+- [mysql_to_bigquery](../../../../examples/mysql_to_bigquery.json)

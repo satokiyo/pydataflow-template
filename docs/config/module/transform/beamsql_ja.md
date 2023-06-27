@@ -10,3 +10,7 @@ Transform Module for transforming data by Beam SQL.
 | inputs_alias | Optional           | List<String\> | Specify the aliases for inputs in sql.                 |
 
 [1] SQL 文で使用できるカラムのデータ型には制約がある。また、Java の Runtime が必要になる。詳細は Apache beam python のドキュメント参照
+
+## 構成例
+
+- [beamsql](../../../../examples/beamsql.json)
