@@ -29,13 +29,10 @@ jobs:
       - name: Poetry Install Dependencies
         run: |
           poetry install --no-interaction
-      - name: Set env
-        run: echo "PYTHONPATH=src/pydataflow_template" >> $GITHUB_ENV
-      - name: Unit Test
+      - name: Test with tox
         run: |
-          make unit-test
-      - name: Lint and format
+          make tox
+      - name: Format
         run: |
-          make lint
           make format
           make isort
