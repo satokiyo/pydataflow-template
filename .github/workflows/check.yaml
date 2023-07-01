@@ -29,9 +29,9 @@ jobs:
       - name: Poetry Install Dependencies
         run: |
           poetry install --no-interaction
-      - name: Test with tox
+      - name: Unit Test
         run: |
-          make tox
+          make unit-test
       - name: Lint and format
         run: |
           make lint
