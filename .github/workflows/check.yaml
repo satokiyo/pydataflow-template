@@ -30,7 +30,7 @@ jobs:
         run: |
           poetry install --no-interaction
       - name: Set env
-        run: echo "PYTHONPATH=tests" >> $GITHUB_ENV
+        run: echo "PYTHONPATH=src/pydataflow_template" >> $GITHUB_ENV
       - name: Unit Test
         run: |
           make unit-test
