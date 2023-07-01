@@ -29,6 +29,8 @@ jobs:
       - name: Poetry Install Dependencies
         run: |
           poetry install --no-interaction
+      - name: Set env
+        run: echo "PYTHONPATH=./src" >> $GITHUB_ENV
       - name: Unit Test
         run: |
           make unit-test
