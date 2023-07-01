@@ -168,7 +168,6 @@ override.tf.json
 terraform.rc
 
 *.bk
-_*.py
 test/
 black/
 tmp*
