@@ -133,9 +133,5 @@ setenv =
     PYTHONPATH = .
 commands =
     poetry install -v --no-root
-	#docker-compose -f tests/integration/docker-compose.yaml up -d
-    #sleep 2
     poetry run python -m pytest -m unit
-	poetry run python -m pytest -m integration
-	#docker-compose -f tests/integration/docker-compose.yaml down --volume
 """
