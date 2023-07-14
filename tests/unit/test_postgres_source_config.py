@@ -336,7 +336,7 @@ class TestPostgresSourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "WHERE CAST(time AS TIMESTAMP) > CAST('2022-12-31 23:50:00' AS TIMESTAMP)"  # postgres: cast as TIMESTAMP
+        expected = "CAST(time AS TIMESTAMP) > CAST('2022-12-31 23:50:00' AS TIMESTAMP)"  # postgres: cast as TIMESTAMP
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -379,7 +379,7 @@ class TestPostgresSourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "WHERE CAST(time AS TIMESTAMP) > CAST('2022-12-31 23:50:00' AS TIMESTAMP)"
+        expected = "CAST(time AS TIMESTAMP) > CAST('2022-12-31 23:50:00' AS TIMESTAMP)"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -422,7 +422,7 @@ class TestPostgresSourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "WHERE CAST(time AS TIMESTAMP) > CAST('2022-12-31 00:00:00' AS TIMESTAMP)"
+        expected = "CAST(time AS TIMESTAMP) > CAST('2022-12-31 00:00:00' AS TIMESTAMP)"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -465,7 +465,7 @@ class TestPostgresSourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "WHERE CAST(time AS TIMESTAMP) > CAST('2022-12-31 00:00:00' AS TIMESTAMP)"
+        expected = "CAST(time AS TIMESTAMP) > CAST('2022-12-31 00:00:00' AS TIMESTAMP)"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -508,7 +508,7 @@ class TestPostgresSourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "WHERE CAST(day AS TIMESTAMP) > CAST('2022-12-12' AS TIMESTAMP)"
+        expected = "CAST(day AS TIMESTAMP) > CAST('2022-12-12' AS TIMESTAMP)"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -551,7 +551,7 @@ class TestPostgresSourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "WHERE CAST(time AS TIMESTAMP) > CAST('2022-12-31 23:50:00' AS TIMESTAMP)"
+        expected = "CAST(time AS TIMESTAMP) > CAST('2022-12-31 23:50:00' AS TIMESTAMP)"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -594,7 +594,7 @@ class TestPostgresSourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "WHERE CAST(time AS TIMESTAMP) > CAST('2022-12-31 14:00:00' AS TIMESTAMP)"
+        expected = "CAST(time AS TIMESTAMP) > CAST('2022-12-31 14:00:00' AS TIMESTAMP)"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -637,7 +637,7 @@ class TestPostgresSourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "WHERE CAST(time AS TIMESTAMP) > CAST('2022-12-31 14:00:00' AS TIMESTAMP)"
+        expected = "CAST(time AS TIMESTAMP) > CAST('2022-12-31 14:00:00' AS TIMESTAMP)"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -680,7 +680,7 @@ class TestPostgresSourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "WHERE CAST(time AS TIMESTAMP) > CAST('2022-12-22' AS TIMESTAMP)"
+        expected = "CAST(time AS TIMESTAMP) > CAST('2022-12-22' AS TIMESTAMP)"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 

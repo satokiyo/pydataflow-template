@@ -13,8 +13,6 @@ from pydataflow_template.main import set_sink_result, set_source_result, set_tra
 from pydataflow_template.modules.module_factory import ModuleFactory, ModuleProxy
 from tests.helper.utils import update_config_json
 
-JST = timezone(timedelta(hours=+9), "JST")
-
 # config base template
 BASE_CONFIG = {
     "name": "test",

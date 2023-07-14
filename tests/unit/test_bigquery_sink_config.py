@@ -12,8 +12,6 @@ from pydataflow_template.ios.ios import IoAdapter, IoType
 from pydataflow_template.ios.schema import MetaData, Schema
 from tests.helper.utils import update_config_json
 
-JST = timezone(timedelta(hours=+9), "JST")
-
 # config base template
 BASE_CONFIG = {
     "name": "test",
@@ -728,7 +726,7 @@ class TestBigQuerySinkConfig:
         )
         profiles_dict = io_adapter.read(IoType.LOCAL_FILE_IO, file_path=base_profiles_json)
 
-        expected = "select max(day) from test.test where day >= date(timestamp_add(current_timestamp(), interval -1 hour)"
+        expected = "select max(day) from test.test where day >= date(timestamp_add(current_timestamp(), interval -1 hour), 'asia/tokyo')"
 
         caplog.set_level(DEBUG)
         config_builder.build(pipeline_config_dict, profiles_dict)
@@ -775,7 +773,7 @@ class TestBigQuerySinkConfig:
         )
         profiles_dict = io_adapter.read(IoType.LOCAL_FILE_IO, file_path=base_profiles_json)
 
-        expected = "select max(datetime) from test.test where datetime >= datetime(timestamp_add(current_timestamp(), interval -1 hour)"
+        expected = "select max(datetime) from test.test where datetime >= datetime(timestamp_add(current_timestamp(), interval -1 hour), 'asia/tokyo')"
 
         caplog.set_level(DEBUG)
         config_builder.build(pipeline_config_dict, profiles_dict)

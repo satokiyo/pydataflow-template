@@ -10,6 +10,7 @@ from configs.config_factory import (
 from exceptions import ParameterValidationError
 from ios.ios import IoType
 from modules.module_factory import ModuleName, ModuleType
+import pytz
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +21,7 @@ class PipelineConfig:
         sources: List[SourceConfigsUnion],
         transforms: List[TransformConfigsUnion],
         sinks: List[SinkConfigsUnion],
+        timezone: pytz.timezone = pytz.timezone("Asia/Tokyo"),
     ) -> None:
         """Initializes the PipelineConfig class.
 
@@ -45,6 +47,7 @@ class PipelineConfig:
         self.sources = sources
         self.transforms = transforms
         self.sinks = sinks
+        self.timezone = timezone
 
     def get_module_names(self) -> List[str]:
         """Returns a list of module names."""
@@ -109,7 +112,7 @@ class PipelineConfig:
                 (
                     incremental_interval_from,
                     column_data_type,
-                ) = source.get_incremental_interval_from_params()
+                ) = source.get_incremental_interval_from_params(timezone=self.timezone)
 
                 # In the case of range replacement (delete+insert), prepare a Delete statement.
                 if (
@@ -139,6 +142,7 @@ class PipelineConfig:
                     incremental_column=source.incremental_column,
                     destination_search_range=source.destination_search_range,
                     io_type=IoType(sink.module),
+                    timezone=self.timezone,
                 )
 
             incremental_query = source.get_incremental_query(
