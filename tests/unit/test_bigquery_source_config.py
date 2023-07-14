@@ -303,7 +303,7 @@ class TestBigQuerySourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "WHERE CAST(time AS DATETIME) > CAST('2022-12-31 23:50:00' AS DATETIME)"
+        expected = "CAST(time AS DATETIME) > CAST('2022-12-31 23:50:00' AS DATETIME)"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -346,7 +346,7 @@ class TestBigQuerySourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "WHERE CAST(time AS DATETIME) > CAST('2022-12-31 23:50:00' AS DATETIME)"
+        expected = "CAST(time AS DATETIME) > CAST('2022-12-31 23:50:00' AS DATETIME)"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -389,7 +389,7 @@ class TestBigQuerySourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "WHERE CAST(time AS DATETIME) > CAST('2022-12-31 00:00:00' AS DATETIME)"
+        expected = "CAST(time AS DATETIME) > CAST('2022-12-31 00:00:00' AS DATETIME)"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -432,7 +432,7 @@ class TestBigQuerySourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "WHERE CAST(time AS DATETIME) > CAST('2022-12-31 00:00:00' AS DATETIME)"
+        expected = "CAST(time AS DATETIME) > CAST('2022-12-31 00:00:00' AS DATETIME)"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -475,7 +475,7 @@ class TestBigQuerySourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "WHERE CAST(day AS DATE) > CAST('2022-12-12' AS DATE)"
+        expected = "CAST(day AS DATE) > CAST('2022-12-12' AS DATE)"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -518,7 +518,7 @@ class TestBigQuerySourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "WHERE CAST(time AS DATETIME) > CAST('2022-12-31 23:50:00' AS DATETIME)"
+        expected = "CAST(time AS DATETIME) > CAST('2022-12-31 23:50:00' AS DATETIME)"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -561,7 +561,7 @@ class TestBigQuerySourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "WHERE CAST(time AS DATETIME) > CAST('2022-12-31 14:00:00' AS DATETIME)"
+        expected = "CAST(time AS DATETIME) > CAST('2022-12-31 14:00:00' AS DATETIME)"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -604,7 +604,7 @@ class TestBigQuerySourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "WHERE CAST(time AS DATETIME) > CAST('2022-12-31 14:00:00' AS DATETIME)"
+        expected = "CAST(time AS DATETIME) > CAST('2022-12-31 14:00:00' AS DATETIME)"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -647,7 +647,7 @@ class TestBigQuerySourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "WHERE CAST(time AS DATE) > CAST('2022-12-22' AS DATE)"
+        expected = "CAST(time AS DATE) > CAST('2022-12-22' AS DATE)"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 

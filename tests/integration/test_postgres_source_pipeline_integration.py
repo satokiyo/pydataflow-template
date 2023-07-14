@@ -12,8 +12,6 @@ from pydataflow_template.ios.ios import IoAdapter, IoType
 from pydataflow_template.main import set_sink_result, set_source_result, set_transform_result
 from pydataflow_template.modules.module_factory import ModuleFactory, ModuleProxy
 
-JST = timezone(timedelta(hours=+9), "JST")
-
 # config base template
 BASE_CONFIG = {
     "name": "test",

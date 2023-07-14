@@ -14,6 +14,7 @@ from configs.validator_base import ValidationPolicy, Validator
 from exceptions import ParameterValidationError
 from ios.ios import IoType
 from ios.schema import Schema
+import pytz
 
 logger = logging.getLogger(__name__)
 
@@ -69,6 +70,7 @@ class BigQuerySinkConfig(ModuleConfigBase, IncrementalSinkConfigBase, BigQuerySi
         incremental_column: str,
         destination_search_range: str,
         io_type: IoType,
+        timezone: pytz.timezone,
     ) -> Tuple[str, str]:
         # Retrieve schema from the BigQuery table
         table_ref = self.table
@@ -89,7 +91,7 @@ class BigQuerySinkConfig(ModuleConfigBase, IncrementalSinkConfigBase, BigQuerySi
                 continue
             column_data_type = field.type
             break
-        if column_data_type not in ["DATE", "DATETIME", "TIMESTAMP"]:
+        if column_data_type.upper() not in ["DATE", "DATETIME", "TIMESTAMP"]:
             msg = "Invalid target type."
             logger.error(msg)
             raise ParameterValidationError(msg)
@@ -106,7 +108,10 @@ class BigQuerySinkConfig(ModuleConfigBase, IncrementalSinkConfigBase, BigQuerySi
             )  # Example: "-15min", "-1hour", "-2day", ...etc.
             X, unit = SEARCH_RANGE_REGEXP.match(search_range_str).group(1, 2)
             X = int(X, 10)
-            query += f" WHERE {incremental_column} >= {column_data_type}(TIMESTAMP_ADD(CURRENT_TIMESTAMP(), INTERVAL -{X} {unit}))"
+            if column_data_type.upper() == "TIMESTAMP":
+                query += f" WHERE {incremental_column} >= {column_data_type}(TIMESTAMP_ADD(CURRENT_TIMESTAMP(), INTERVAL -{X} {unit}))"
+            else:
+                query += f" WHERE {incremental_column} >= {column_data_type}(TIMESTAMP_ADD(CURRENT_TIMESTAMP(), INTERVAL -{X} {unit}), '{timezone}')"
         logger.debug(query)
 
         # Execute the query

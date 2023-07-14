@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 import logging
 import re
 from typing import Tuple
@@ -6,10 +6,9 @@ from typing import Tuple
 from configs.config_base import ModuleCommonParams
 from configs.validator_base import Validator
 from exceptions import ParameterValidationError
+import pytz
 
 logger = logging.getLogger(__name__)
-
-JST = timezone(timedelta(hours=+9), "JST")
 
 
 class SourceConfigCommonParams(ModuleCommonParams):
@@ -43,7 +42,7 @@ class IncrementalSourceConfigBase(SourceConfigCommonParams, IncrementalSourcePar
     INTERVAL_REGEXP = re.compile(r"(^[1-9][0-9]*)([a-z].*)")
     REGEXP_QUERY_CONTAIN_WHERE = re.compile(r".*\s(where)\s.*")
 
-    def get_incremental_interval_from_params(self) -> Tuple[str, str]:
+    def get_incremental_interval_from_params(self, timezone: pytz.timezone) -> Tuple[str, str]:
         """
         Gets the incremental interval from the configuration parameters and returns it as a tuple of the incremental interval
         start time and the data type of the column used for incremental updates.
@@ -58,17 +57,19 @@ class IncrementalSourceConfigBase(SourceConfigCommonParams, IncrementalSourcePar
         x = int(x)
         if unit == "min":
             column_data_type = "DATETIME"
-            incremental_interval_from = (datetime.now(JST) - timedelta(minutes=x)).strftime(
+            incremental_interval_from = (datetime.now(timezone) - timedelta(minutes=x)).strftime(
                 "%Y-%m-%d %H:%M:%S"
             )
         elif unit == "hour":
             column_data_type = "DATETIME"
-            incremental_interval_from = (datetime.now(JST) - timedelta(hours=x)).strftime(
+            incremental_interval_from = (datetime.now(timezone) - timedelta(hours=x)).strftime(
                 "%Y-%m-%d %H:%M:%S"
             )
         else:
             column_data_type = "DATE"
-            incremental_interval_from = (datetime.now(JST) - timedelta(days=x)).strftime("%Y-%m-%d")
+            incremental_interval_from = (datetime.now(timezone) - timedelta(days=x)).strftime(
+                "%Y-%m-%d"
+            )
 
         return incremental_interval_from, column_data_type
 
@@ -87,14 +88,21 @@ class IncrementalSourceConfigBase(SourceConfigCommonParams, IncrementalSourcePar
         Returns:
             str: The modified SQL query with the incremental condition added.
         """
-        sql = sql_query.replace(";", "")
+        sql = sql_query[:].replace(";", "")  # copy
         where_clause = f"CAST({self.incremental_column} AS {cast_type}) > CAST('{incremental_interval_from}' AS {cast_type})"
-        if not self.REGEXP_QUERY_CONTAIN_WHERE.match(sql.lower()):
-            sql += f" WHERE {where_clause}"
-        else:
-            sql += f" AND {where_clause}"
 
-        return sql
+        sql_with_incremental_range = f"""
+            WITH base AS (
+                {sql}
+            )
+            SELECT
+                *
+            FROM
+                base
+            WHERE
+                {where_clause}
+        """
+        return sql_with_incremental_range
 
 
 class SourceValidator(Validator):
