@@ -20,7 +20,7 @@ wheel = "^0.40.0"
 pandas = "^2.0.1"
 db-dtypes = "^1.1.1"
 mysql-connector-python = "^8.0.33"
-beam-mysql-connector = {url = "https://github.com/satokiyo/beam-mysql-connector/releases/download/1.8.5/beam_mysql_connector-1.8.5-py3-none-any.whl"}
+beam-mysql-connector = {url = "https://github.com/satokiyo/beam-mysql-connector/releases/download/1.8.6/beam_mysql_connector-1.8.6-py3-none-any.whl"}
 urllib3 = "1.26"
 
 
