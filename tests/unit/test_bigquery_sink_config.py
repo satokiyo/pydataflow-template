@@ -1,4 +1,3 @@
-from datetime import timedelta, timezone
 import json
 from logging import DEBUG
 
@@ -680,152 +679,12 @@ class TestBigQuerySinkConfig:
         )
         profiles_dict = io_adapter.read(IoType.LOCAL_FILE_IO, file_path=base_profiles_json)
 
-        expected = "select max(day) from test.test"
+        expected = "SELECT FORMAT_DATE('%Y-%m-%d 23:59:59', MAX(day)) FROM test.test"
 
         caplog.set_level(DEBUG)
         config_builder.build(pipeline_config_dict, profiles_dict)
 
-        assert expected in caplog.text.lower()
-
-    def test_get_incremental_interval_from_destination_table_with_specified_search_range_from_date_type_field(
-        self,
-        base_config_json,
-        base_profiles_json,
-        config_builder,
-        io_adapter,
-        caplog: LogCaptureFixture,
-    ):
-        update_data = {
-            "sources": [
-                {
-                    "name": "in",
-                    "incremental": True,
-                    "parameters": {
-                        "query": "select id, day, datetime, timestamp from test.test;",
-                        "incremental_interval_from": "max_value_in_destination",
-                        "destination_sink_name": "out",
-                        "destination_search_range": "-1hour",
-                        "incremental_column": "day",
-                    },
-                },
-            ],
-            "sinks": [
-                {
-                    "mode": "append",
-                    "parameters": {
-                        "partitioning": "DAY",
-                        "partitioning_field": "day",
-                        "schema": "id:INTEGER,day:DATE,datetime:DATETIME,timestamp:TIMESTAMP",
-                    },
-                },
-            ],
-        }
-        pipeline_config_file_path = update_config_json(update_data, base_config_json)
-        pipeline_config_dict = io_adapter.read(
-            IoType.LOCAL_FILE_IO, file_path=pipeline_config_file_path
-        )
-        profiles_dict = io_adapter.read(IoType.LOCAL_FILE_IO, file_path=base_profiles_json)
-
-        expected = "select max(day) from test.test where day >= date(timestamp_add(current_timestamp(), interval -1 hour), 'asia/tokyo')"
-
-        caplog.set_level(DEBUG)
-        config_builder.build(pipeline_config_dict, profiles_dict)
-
-        assert expected in caplog.text.lower()
-
-    def test_get_incremental_interval_from_destination_table_with_specified_search_range_from_datetime_type_field(
-        self,
-        base_config_json,
-        base_profiles_json,
-        config_builder,
-        io_adapter,
-        caplog: LogCaptureFixture,
-    ):
-        update_data = {
-            "sources": [
-                {
-                    "name": "in",
-                    "module": "mysql",
-                    "incremental": True,
-                    "parameters": {
-                        "query": "select id, day, datetime, timestamp from test.test;",
-                        "incremental_interval_from": "max_value_in_destination",
-                        "destination_sink_name": "out",
-                        "destination_search_range": "-1hour",
-                        "incremental_column": "datetime",
-                    },
-                },
-            ],
-            "sinks": [
-                {
-                    "mode": "append",
-                    "parameters": {
-                        "partitioning": "DAY",
-                        "partitioning_field": "datetime",
-                        "schema": "id:INTEGER,day:DATE,datetime:DATETIME,timestamp:TIMESTAMP",
-                    },
-                },
-            ],
-        }
-        pipeline_config_file_path = update_config_json(update_data, base_config_json)
-        pipeline_config_dict = io_adapter.read(
-            IoType.LOCAL_FILE_IO, file_path=pipeline_config_file_path
-        )
-        profiles_dict = io_adapter.read(IoType.LOCAL_FILE_IO, file_path=base_profiles_json)
-
-        expected = "select max(datetime) from test.test where datetime >= datetime(timestamp_add(current_timestamp(), interval -1 hour), 'asia/tokyo')"
-
-        caplog.set_level(DEBUG)
-        config_builder.build(pipeline_config_dict, profiles_dict)
-
-        assert expected in caplog.text.lower()
-
-    def test_get_incremental_interval_from_destination_table_with_specified_search_range_from_timestamp_type_field(
-        self,
-        base_config_json,
-        base_profiles_json,
-        config_builder,
-        io_adapter,
-        caplog: LogCaptureFixture,
-    ):
-        update_data = {
-            "sources": [
-                {
-                    "name": "in",
-                    "module": "mysql",
-                    "incremental": True,
-                    "parameters": {
-                        "query": "select id, day, datetime, timestamp from test.test;",
-                        "incremental_interval_from": "max_value_in_destination",
-                        "destination_sink_name": "out",
-                        "destination_search_range": "-1hour",
-                        "incremental_column": "timestamp",
-                    },
-                },
-            ],
-            "sinks": [
-                {
-                    "mode": "append",
-                    "parameters": {
-                        "partitioning": "DAY",
-                        "partitioning_field": "timestamp",
-                        "schema": "id:INTEGER,day:DATE,datetime:DATETIME,timestamp:TIMESTAMP",
-                    },
-                },
-            ],
-        }
-        pipeline_config_file_path = update_config_json(update_data, base_config_json)
-        pipeline_config_dict = io_adapter.read(
-            IoType.LOCAL_FILE_IO, file_path=pipeline_config_file_path
-        )
-        profiles_dict = io_adapter.read(IoType.LOCAL_FILE_IO, file_path=base_profiles_json)
-
-        expected = "select max(timestamp) from test.test where timestamp >= timestamp(timestamp_add(current_timestamp(), interval -1 hour)"
-
-        caplog.set_level(DEBUG)
-        config_builder.build(pipeline_config_dict, profiles_dict)
-
-        assert expected in caplog.text.lower()
+        assert expected.lower() in caplog.text.lower()
 
     def test_mode_of_sink_config_expected_to_be_append_or_merge_in_incremental_mode(
         self,

@@ -1,4 +1,4 @@
-from datetime import date, timedelta, timezone
+from datetime import date
 import json
 
 import apache_beam as beam

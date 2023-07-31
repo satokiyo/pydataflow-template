@@ -68,7 +68,6 @@ class BigQuerySinkConfig(ModuleConfigBase, IncrementalSinkConfigBase, BigQuerySi
     def get_incremental_interval_from_destination_table(
         self,
         incremental_column: str,
-        destination_search_range: str,
         io_type: IoType,
         timezone: pytz.timezone,
     ) -> Tuple[str, str]:
@@ -98,20 +97,15 @@ class BigQuerySinkConfig(ModuleConfigBase, IncrementalSinkConfigBase, BigQuerySi
 
         # Get the MAX value of the incremental_column from the sink table
         _, table = self.table.split(":")
-        query = f"SELECT MAX({incremental_column}) FROM {table}"
+        if column_data_type.upper() == "DATE":
+            query = (
+                f"SELECT FORMAT_DATE('%Y-%m-%d 23:59:59', MAX({incremental_column})) FROM {table}"
+            )
+        elif column_data_type.upper() == "DATETIME":
+            query = f"SELECT FORMAT_DATETIME('%Y-%m-%d %H-%M-%S', MAX({incremental_column})) FROM {table}"
+        elif column_data_type.upper() == "TIMESTAMP":
+            query = f"SELECT FORMAT_TIMESTAMP('%Y-%m-%d %H-%M-%S', MAX({incremental_column}), {timezone.zone}) FROM {table}"
 
-        # Narrow down the range if destination_search_range is specified
-        if destination_search_range:
-            search_range_str = destination_search_range.lower()
-            SEARCH_RANGE_REGEXP = re.compile(
-                "^-([1-9][0-9]*)([a-z].*)"
-            )  # Example: "-15min", "-1hour", "-2day", ...etc.
-            X, unit = SEARCH_RANGE_REGEXP.match(search_range_str).group(1, 2)
-            X = int(X, 10)
-            if column_data_type.upper() == "TIMESTAMP":
-                query += f" WHERE {incremental_column} >= {column_data_type}(TIMESTAMP_ADD(CURRENT_TIMESTAMP(), INTERVAL -{X} {unit}))"
-            else:
-                query += f" WHERE {incremental_column} >= {column_data_type}(TIMESTAMP_ADD(CURRENT_TIMESTAMP(), INTERVAL -{X} {unit}), '{timezone}')"
         logger.debug(query)
 
         # Execute the query

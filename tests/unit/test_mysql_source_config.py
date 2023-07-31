@@ -337,7 +337,7 @@ class TestMysqlSourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "CAST(time AS DATETIME) > CAST('2022-12-31 23:50:00' AS DATETIME)"
+        expected = "TIMESTAMP(time) > CONVERT_TZ('2022-12-31 23:50:00', 'Asia/Tokyo', 'Asia/Tokyo')"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -380,7 +380,7 @@ class TestMysqlSourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "CAST(time AS DATETIME) > CAST('2022-12-31 23:50:00' AS DATETIME)"
+        expected = "TIMESTAMP(time) > CONVERT_TZ('2022-12-31 23:50:00', 'Asia/Tokyo', 'Asia/Tokyo')"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -423,7 +423,7 @@ class TestMysqlSourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "CAST(time AS DATETIME) > CAST('2022-12-31 00:00:00' AS DATETIME)"
+        expected = "TIMESTAMP(time) > CONVERT_TZ('2022-12-31 00:00:00', 'Asia/Tokyo', 'Asia/Tokyo')"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -466,7 +466,7 @@ class TestMysqlSourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "CAST(time AS DATETIME) > CAST('2022-12-31 00:00:00' AS DATETIME)"
+        expected = "TIMESTAMP(time) > CONVERT_TZ('2022-12-31 00:00:00', 'Asia/Tokyo', 'Asia/Tokyo')"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -509,7 +509,7 @@ class TestMysqlSourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "CAST(day AS DATE) > CAST('2022-12-12' AS DATE)"
+        expected = "TIMESTAMP(day) > CONVERT_TZ('2022-12-12 23:59:59', 'Asia/Tokyo', 'Asia/Tokyo')"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -552,7 +552,7 @@ class TestMysqlSourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "CAST(time AS DATETIME) > CAST('2022-12-31 23:50:00' AS DATETIME)"
+        expected = "TIMESTAMP(time) > CONVERT_TZ('2022-12-31 23:50:00', 'Asia/Tokyo', 'Asia/Tokyo')"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -595,7 +595,7 @@ class TestMysqlSourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "CAST(time AS DATETIME) > CAST('2022-12-31 14:00:00' AS DATETIME)"
+        expected = "TIMESTAMP(time) > CONVERT_TZ('2022-12-31 14:00:00', 'Asia/Tokyo', 'Asia/Tokyo')"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -638,7 +638,7 @@ class TestMysqlSourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "CAST(time AS DATETIME) > CAST('2022-12-31 14:00:00' AS DATETIME)"
+        expected = "TIMESTAMP(time) > CONVERT_TZ('2022-12-31 14:00:00', 'Asia/Tokyo', 'Asia/Tokyo')"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -681,7 +681,7 @@ class TestMysqlSourceConfig:
 
         freezer.move_to(datetime(2023, 1, 1, 0, 0, tzinfo=JST))
 
-        expected = "CAST(time AS DATE) > CAST('2022-12-22' AS DATE)"
+        expected = "TIMESTAMP(time) > CONVERT_TZ('2022-12-22 23:59:59', 'Asia/Tokyo', 'Asia/Tokyo')"
 
         config = config_builder.build(pipeline_config_dict, profiles_dict)
 
@@ -740,86 +740,6 @@ class TestMysqlSourceConfig:
                     "parameters": {
                         "query": "select id, day, datetime, timestamp from test.test;",
                         "incremental_interval_from": "1 hour",
-                        "incremental_column": "timestamp",
-                    },
-                },
-            ],
-            "sinks": [
-                {
-                    "parameters": {
-                        "partitioning_field": "timestamp",
-                        "schema": "id:INTEGER,day:DATE,datetime:DATETIME,timestamp:TIMESTAMP",
-                    }
-                },
-            ],
-        }
-        pipeline_config_file_path = update_config_json(update_data, base_config_json)
-
-        pipeline_config_dict = io_adapter.read(
-            IoType.LOCAL_FILE_IO, file_path=pipeline_config_file_path
-        )
-        profiles_dict = io_adapter.read(IoType.LOCAL_FILE_IO, file_path=base_profiles_json)
-
-        with pytest.raises(Exception) as e:
-            config_builder.build(pipeline_config_dict, profiles_dict)
-
-        assert str(e.typename) == "ParameterValidationError"
-
-    def test_destination_search_range_format_invalid1(
-        self,
-        base_config_json,
-        base_profiles_json,
-        config_builder,
-        io_adapter,
-    ):
-        update_data = {
-            "sources": [
-                {
-                    "incremental": True,
-                    "parameters": {
-                        "query": "select id, day, datetime, timestamp from test.test;",
-                        "incremental_interval_from": "max_value_in_destination",
-                        "destination_search_range": "-1 hour",
-                        "incremental_column": "timestamp",
-                    },
-                },
-            ],
-            "sinks": [
-                {
-                    "parameters": {
-                        "partitioning_field": "timestamp",
-                        "schema": "id:INTEGER,day:DATE,datetime:DATETIME,timestamp:TIMESTAMP",
-                    }
-                },
-            ],
-        }
-        pipeline_config_file_path = update_config_json(update_data, base_config_json)
-
-        pipeline_config_dict = io_adapter.read(
-            IoType.LOCAL_FILE_IO, file_path=pipeline_config_file_path
-        )
-        profiles_dict = io_adapter.read(IoType.LOCAL_FILE_IO, file_path=base_profiles_json)
-
-        with pytest.raises(Exception) as e:
-            config_builder.build(pipeline_config_dict, profiles_dict)
-
-        assert str(e.typename) == "ParameterValidationError"
-
-    def test_destination_search_range_format_invalid2(
-        self,
-        base_config_json,
-        base_profiles_json,
-        config_builder,
-        io_adapter,
-    ):
-        update_data = {
-            "sources": [
-                {
-                    "incremental": True,
-                    "parameters": {
-                        "query": "select id, day, datetime, timestamp from test.test;",
-                        "incremental_interval_from": "max_value_in_destination",
-                        "destination_search_range": "1hour",
                         "incremental_column": "timestamp",
                     },
                 },
