@@ -109,18 +109,17 @@ class PipelineConfig:
             sink = self._get_sink_ref(source)
             if source.incremental_interval_from != "max_value_in_destination":
                 # If the interval is specified in the configuration.
-                (
-                    incremental_interval_from,
-                    column_data_type,
-                ) = source.get_incremental_interval_from_params(timezone=self.timezone)
-
+                incremental_interval_from, _ = source.get_incremental_interval_from_params(
+                    timezone=self.timezone
+                )
                 # In the case of range replacement (delete+insert), prepare a Delete statement.
                 if (
                     sink.mode == "merge"
                     and len(sink.merge_keys) == 1
                     and (sink.merge_keys[0] == sink.partitioning_field)
                 ):
-                    delete_query = f"DELETE FROM {sink.table.split(':')[-1]} WHERE CAST({source.incremental_column} AS {column_data_type}) > CAST('{incremental_interval_from}' AS {column_data_type})"
+                    # FIXME prepare delete queries not for each database separately in child classes.
+                    delete_query = f"DELETE FROM {sink.table.split(':')[-1]} WHERE CAST({source.incremental_column} AS TIMESTAMP) > PARSE_TIMESTAMP('%Y-%m-%d %H:%M:%S', '{incremental_interval_from}', 'UTC')"
                     logger.info("save delete query %s", delete_query)
                     # update original params
                     original_params = sink.get_original_param_dict()
@@ -135,18 +134,14 @@ class PipelineConfig:
 
                 # When incremental_interval_from is set to "max_value_in_destination", the maximum value of the
                 # incremental_column is retrieved from the destination table.
-                (
-                    incremental_interval_from,
-                    column_data_type,
-                ) = sink.get_incremental_interval_from_destination_table(
+                incremental_interval_from = sink.get_incremental_interval_from_destination_table(
                     incremental_column=source.incremental_column,
-                    destination_search_range=source.destination_search_range,
                     io_type=IoType(sink.module),
                     timezone=self.timezone,
                 )
 
             incremental_query = source.get_incremental_query(
-                incremental_interval_from, cast_type=column_data_type
+                incremental_interval_from, timezone=self.timezone
             )
             logger.info(
                 "overwrite source query (%s):\n(from) %s\n(to) %s",

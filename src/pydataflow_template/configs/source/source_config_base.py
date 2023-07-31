@@ -1,3 +1,4 @@
+import abc
 from datetime import datetime, timedelta
 import logging
 import re
@@ -18,7 +19,6 @@ class SourceConfigCommonParams(ModuleCommonParams):
 class IncrementalSourceParams:
     incremental_column: str = ""
     incremental_interval_from: str = "max_value_in_destination"
-    destination_search_range: str = ""
     destination_sink_name: str = ""
 
 
@@ -36,16 +36,15 @@ class IncrementalSourceConfigBase(SourceConfigCommonParams, IncrementalSourcePar
 
     Attributes:
         INTERVAL_REGEXP (re.Pattern): A regular expression pattern used to extract the value and unit of the incremental interval from a string.
-        REGEXP_QUERY_CONTAIN_WHERE (re.Pattern): A regular expression pattern used to check if a SQL query already contains a WHERE clause.
     """
 
     INTERVAL_REGEXP = re.compile(r"(^[1-9][0-9]*)([a-z].*)")
-    REGEXP_QUERY_CONTAIN_WHERE = re.compile(r".*\s(where)\s.*")
 
     def get_incremental_interval_from_params(self, timezone: pytz.timezone) -> Tuple[str, str]:
         """
         Gets the incremental interval from the configuration parameters and returns it as a tuple of the incremental interval
         start time and the data type of the column used for incremental updates.
+        Return the time representation in the specified time zone.
 
         Returns:
             Tuple[str, str]: A tuple containing the incremental interval start time and the data type of the column used for
@@ -56,23 +55,22 @@ class IncrementalSourceConfigBase(SourceConfigCommonParams, IncrementalSourcePar
         x, unit = self.INTERVAL_REGEXP.match(self.incremental_interval_from.lower()).group(1, 2)
         x = int(x)
         if unit == "min":
-            column_data_type = "DATETIME"
             incremental_interval_from = (datetime.now(timezone) - timedelta(minutes=x)).strftime(
                 "%Y-%m-%d %H:%M:%S"
             )
         elif unit == "hour":
-            column_data_type = "DATETIME"
             incremental_interval_from = (datetime.now(timezone) - timedelta(hours=x)).strftime(
                 "%Y-%m-%d %H:%M:%S"
             )
         else:
-            column_data_type = "DATE"
             incremental_interval_from = (datetime.now(timezone) - timedelta(days=x)).strftime(
-                "%Y-%m-%d"
+                "%Y-%m-%d 23:59:59"
             )
 
+        column_data_type = "TIMESTAMP"
         return incremental_interval_from, column_data_type
 
+    @abc.abstractclassmethod
     def get_incremental_query(
         self, incremental_interval_from: str, cast_type: str, sql_query: str
     ) -> str:
@@ -88,21 +86,7 @@ class IncrementalSourceConfigBase(SourceConfigCommonParams, IncrementalSourcePar
         Returns:
             str: The modified SQL query with the incremental condition added.
         """
-        sql = sql_query[:].replace(";", "")  # copy
-        where_clause = f"CAST({self.incremental_column} AS {cast_type}) > CAST('{incremental_interval_from}' AS {cast_type})"
-
-        sql_with_incremental_range = f"""
-            WITH base AS (
-                {sql}
-            )
-            SELECT
-                *
-            FROM
-                base
-            WHERE
-                {where_clause}
-        """
-        return sql_with_incremental_range
+        raise NotImplementedError()
 
 
 class SourceValidator(Validator):
@@ -131,7 +115,6 @@ class SourceValidator(Validator):
 
 
 class IncrementalSourceValidator(Validator):
-    SEARCH_RANGE_REGEXP = re.compile(r"^-([1-9][0-9]*)([a-z].*)")
     UNIT_OPTIONS = ["min", "hour", "day"]
 
     def validate(self, config: IncrementalSourceParams, is_incremental: bool = False) -> bool:
@@ -154,26 +137,6 @@ class IncrementalSourceValidator(Validator):
                 errors.append(
                     "Please specify the 'destination_sink_name' in the source configuration when 'incremental_interval_from' is set to 'max_value_in_destination'."
                 )
-
-            if config.destination_search_range:
-                m = self.SEARCH_RANGE_REGEXP.match(config.destination_search_range.lower())
-
-                if not m:
-                    errors.append("The format of 'destination_search_range' is invalid.")
-                else:
-                    x, unit = m.group(1, 2)
-
-                    try:
-                        x = int(x)
-                    except ValueError:
-                        errors.append(
-                            "The format of 'destination_search_range' is invalid. 'X' must be an integer string."
-                        )
-
-                    if unit not in self.UNIT_OPTIONS:
-                        errors.append(
-                            "The format of 'destination_search_range' is invalid. 'unit' must be in [min, hour, day]."
-                        )
         else:
             m = IncrementalSourceConfigBase.INTERVAL_REGEXP.match(
                 config.incremental_interval_from.lower()

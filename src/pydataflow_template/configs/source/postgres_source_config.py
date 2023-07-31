@@ -12,6 +12,7 @@ from configs.source.source_config_base import (
 )
 from configs.validator_base import ValidationPolicy, Validator
 from exceptions import ParameterValidationError
+import pytz
 
 logger = logging.getLogger(__name__)
 
@@ -49,14 +50,16 @@ class PostgresSourceConfig(
         updated = copied
         return super().update_module_params(**updated)
 
-    def get_incremental_query(
-        self, incremental_interval_from: str, cast_type: str, sql_query: str = ""
-    ) -> str:
-        cast_type = "TIMESTAMP"  # postgres: cast as TIMESTAMP
-        sql_query = self.query.sql
-        return super().get_incremental_query(
-            incremental_interval_from, cast_type=cast_type, sql_query=sql_query
-        )
+    def get_incremental_query(self, incremental_interval_from: str, timezone: pytz.timezone) -> str:
+        where_clause = f"CAST({self.incremental_column} AS TIMESTAMP) > TO_TIMESTAMP('{incremental_interval_from}', '%Y-%m-%d %H:%M:%S') AT TIME ZONE '{timezone.zone}'"
+        base_sql = self.query.sql[:].replace(";", "")  # copy
+
+        return f"""
+            WITH BASE AS (
+                {base_sql}
+            )
+            SELECT * FROM BASE WHERE {where_clause}
+        """
 
 
 class PostgresSourceValidator(Validator):

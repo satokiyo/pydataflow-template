@@ -6,6 +6,7 @@ from configs.config_base import ModuleCommonParams
 from configs.validator_base import Validator
 from exceptions import ParameterValidationError
 from ios.ios import IoType
+import pytz
 
 logger = logging.getLogger(__name__)
 
@@ -40,15 +41,15 @@ class IncrementalSinkConfigBase(SinkConfigCommonParams):
     def get_incremental_interval_from_destination_table(
         self,
         incremental_column: str,
-        destination_search_range: str,
         io_type: IoType,
+        timezone: pytz.timezone,
     ) -> Tuple[str, str]:
         """
         Abstract method to get incremental interval from destination table.
+        Return the time representation in the specified time zone.
 
         Parameters:
             incremental_column (str): The name of the column used as an incremental key.
-            destination_search_range (str): The search range of the destination table.
             io_type: Type of IO to be used.
 
         Returns:

@@ -1,4 +1,4 @@
-from datetime import date, timedelta, timezone
+from datetime import date
 import json
 
 import apache_beam as beam
@@ -86,58 +86,6 @@ class TestPostgresSourcePipeline:
         return beam.options.pipeline_options.PipelineOptions(
             beam_args, save_main_session=True, streaming=False
         )
-
-    # @pytest.mark.usefixtures("create_bigquery_test_table")
-    # def test_bigquery_to_bigquery_pipeline(
-    #    self,
-    #    base_config_json,
-    #    base_profiles_json,
-    #    io_adapter,
-    #    config_builder,
-    #    module_proxy,
-    # ):
-    #    pipeline_config_dict = io_adapter.read(IoType.LOCAL_FILE_IO, file_path=base_config_json)
-    #    profiles_dict = io_adapter.read(IoType.LOCAL_FILE_IO, file_path=base_profiles_json)
-
-    #    try:
-    #        pipeline_config = config_builder.build(pipeline_config_dict, profiles_dict)
-    #        num_modules = len(pipeline_config.get_module_names())
-    #        executed_module_names = set()
-    #        outputs = {}
-    #        with TestPipeline() as pipeline:
-    #            # expand graphs
-    #            while len(executed_module_names) < num_modules:
-    #                set_source_result(
-    #                    module_proxy,
-    #                    pipeline,
-    #                    pipeline_config.sources,
-    #                    outputs,
-    #                    executed_module_names,
-    #                )
-    #                set_transform_result(
-    #                    module_proxy,
-    #                    pipeline,
-    #                    pipeline_config.transforms,
-    #                    outputs,
-    #                    executed_module_names,
-    #                )
-    #                set_sink_result(
-    #                    module_proxy,
-    #                    pipeline,
-    #                    pipeline_config.sinks,
-    #                    outputs,
-    #                    executed_module_names,
-    #                )
-
-    #        assert_that(outputs["in"].pcol, equal_to(DATA))
-
-    #        output_data = io_adapter.read(
-    #            IoType.BIGQUERY_RDB_IO, query="select * from py-dataflow.test.test2"
-    #        )
-    #        assert sorted(output_data.to_dict("records"), key=lambda x: x["id"]) == DATA
-
-    #    except Exception:
-    #        pytest.fail()
 
     @pytest.mark.usefixtures("create_bigquery_test_table")
     def test_bigquery_to_bigquery_pipeline(
